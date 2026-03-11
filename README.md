@@ -228,6 +228,14 @@ is kept in case you reinstall. To fully clean up, delete the install folder
 
 ---
 
+## What It Looks Like
+
+<p align="center">
+  <img src="NotificationExample.png" alt="Nag notification example">
+</p>
+
+---
+
 ## Making It Yours
 
 The whole point of Nag is to hit you with **your own** messages and imagery.
@@ -334,4 +342,4 @@ Mix and match — everyone's Nag becomes their own weird little thing.
 
 ## License
 
-This project is provided as-is for personal use.
+Free for personal use — use it, fork it, change it. Just don't sell it. See [LICENSE](LICENSE) for details.
