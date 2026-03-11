@@ -1,0 +1,42 @@
+# Build outputs
+bin/
+obj/
+publish/
+Releases/
+
+# IDE
+.vs/
+.vscode/
+*.user
+*.suo
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Runtime data (user-specific, created on launch)
+Nag/Categories/
+Nag/Images/
+Nag/publish/
+
+# Debug
+*.pdb
+
+# Velopack temp
+.velopack/
+
+# Gemini agent artifacts
+.gemini/
+
+# Build artifacts (Velopack staging)
+artifacts/
+
+# .NET SDK temp
+.dotnet-home/
+
+# Claude Code config
+.claude/
+
+# Runtime data (personal messages & user settings)
+Nag/messages.json
+Nag/settings.json

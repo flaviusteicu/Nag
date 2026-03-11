@@ -1,0 +1,50 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="Nag.Views.NotificationPopup"
+        Title="Nag Notification" 
+        Width="520" SizeToContent="Height" MinHeight="150" MaxHeight="800"
+        SystemDecorations="None" Background="Transparent" TransparencyLevelHint="Transparent"
+        Topmost="True" ShowInTaskbar="False" ShowActivated="False" Focusable="False"
+        CanResize="False" Loaded="Window_Loaded" SizeChanged="Window_SizeChanged"
+        FontFamily="Inter">
+
+    <Grid x:Name="MainGrid" RenderTransform="translateX(550px)">
+        <Grid.Transitions>
+            <Transitions>
+                <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.4" Easing="CubicEaseOut" />
+            </Transitions>
+        </Grid.Transitions>
+    
+        <Border Background="#F216213E" CornerRadius="4" Margin="140,40,10,10" BoxShadow="0 4 10 0 #80000000">
+            <Grid ColumnDefinitions="4,*,30" RowDefinitions="Auto,*,4">
+                <Border Grid.RowSpan="3" Grid.Column="0" Background="#2ECC71" CornerRadius="4,0,0,4" />
+
+                <StackPanel Grid.Column="1" Grid.Row="0" Grid.RowSpan="2" Margin="15,15,10,15" VerticalAlignment="Center">
+                    <TextBlock x:Name="CategoryText" Text="Category Name" Foreground="#888888" FontSize="12" Margin="0,0,0,6" />
+                    <TextBlock x:Name="MessageText" Text="Message text goes here." 
+                               Foreground="#FFFFFF" FontSize="16" 
+                               TextWrapping="Wrap" LineHeight="24" />
+                </StackPanel>
+
+                <Button Grid.Column="2" Grid.Row="0" Margin="0,5,5,0" Width="20" Height="20" Padding="0"
+                        VerticalAlignment="Top" HorizontalAlignment="Right"
+                        Background="Transparent" BorderBrush="Transparent" Foreground="#888888" Cursor="Hand"
+                        Click="CloseButton_Click" CornerRadius="4">
+                    <TextBlock Text="X" FontWeight="Bold" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    <Button.Styles>
+                        <Style Selector="Button:pointerover /template/ ContentPresenter">
+                            <Setter Property="Background" Value="Transparent"/>
+                            <Setter Property="TextBlock.Foreground" Value="#FFFFFF" />
+                        </Style>
+                    </Button.Styles>
+                </Button>
+
+                <ProgressBar x:Name="DurationProgress" Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" 
+                             Background="Transparent" BorderThickness="0" Foreground="#2ECC71" 
+                             Maximum="100" />
+            </Grid>
+        </Border>
+
+        <Image x:Name="AvatarImage" Width="140" Height="140" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="50,15,0,0" Stretch="Uniform" />
+    </Grid>
+</Window>

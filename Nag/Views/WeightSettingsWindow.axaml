@@ -1,0 +1,62 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:helpers="clr-namespace:Nag.Helpers"
+        x:Class="Nag.Views.WeightSettingsWindow"
+        Title="Category Weights — Nag" SizeToContent="Height" Width="420"
+        WindowStartupLocation="CenterOwner"
+        Background="#1A1A2E" Foreground="#FFFFFF"
+        CanResize="False" FontFamily="Inter">
+    <Window.Styles>
+        <Style Selector="TextBlock">
+            <Setter Property="Foreground" Value="#EEEEEE"/>
+        </Style>
+        <Style Selector="Button.cancel">
+            <Setter Property="Foreground" Value="#888888"/>
+            <Setter Property="Background" Value="#16213E"/>
+        </Style>
+        <Style Selector="Button.cancel:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#283A5E"/>
+            <Setter Property="BorderBrush" Value="White"/>
+            <Setter Property="Foreground" Value="White"/>
+        </Style>
+        <Style Selector="Button.save">
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Background" Value="#2ECC71"/>
+        </Style>
+        <Style Selector="Button.save:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#29b765"/>
+        </Style>
+    </Window.Styles>
+    
+    <Grid Margin="20" RowDefinitions="Auto,*,Auto">
+        <TextBlock Grid.Row="0" Text="Adjust relative frequency. Higher numbers mean the category will appear more often compared to others." 
+                   TextWrapping="Wrap" Margin="0,0,0,15" Foreground="#BBBBBB" FontSize="12" />
+
+        <ItemsControl Grid.Row="1" ItemsSource="{Binding CategoryViewModels}">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Grid Margin="0,0,0,15" ColumnDefinitions="Auto,120,*,30">
+                        <Image Grid.Column="0" Source="{Binding AvatarPath, Converter={x:Static helpers:BitmapValueConverter.Instance}}" Width="24" Height="24" Margin="0,0,10,0"/>
+                        
+                        <TextBlock Grid.Column="1" Text="{Binding Category.Name}" VerticalAlignment="Center" FontWeight="SemiBold"/>
+                        
+                        <Slider Grid.Column="2" Minimum="1" Maximum="10" Value="{Binding Weight}" 
+                                TickFrequency="1" IsSnapToTickEnabled="True" VerticalAlignment="Center" Margin="10,0,10,0"/>
+                        
+                        <TextBlock Grid.Column="3" Text="{Binding Weight}" VerticalAlignment="Center" HorizontalAlignment="Right" FontWeight="Bold" Foreground="#2ECC71"/>
+                    </Grid>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+        <!-- Buttons -->
+        <Grid Grid.Row="2" Margin="0,10,0,0" ColumnDefinitions="*,10,*">
+            <Button Classes="cancel" Grid.Column="0" Command="{Binding CancelCommand}" Content="Cancel" 
+                    BorderThickness="1" BorderBrush="#888888" 
+                    Height="35" Cursor="Hand" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" CornerRadius="4"/>
+            <Button Classes="save" Grid.Column="2" Command="{Binding SaveCommand}" Content="Save Weights" 
+                    BorderThickness="0" 
+                    Height="35" FontWeight="SemiBold" Cursor="Hand" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" CornerRadius="4"/>
+        </Grid>
+    </Grid>
+</Window>

@@ -1,0 +1,67 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="Nag.Views.WelcomeWindow"
+        Title="Welcome — Nag"
+        SizeToContent="Height"
+        Width="420"
+        WindowStartupLocation="CenterScreen"
+        Background="#1A1A2E"
+        Foreground="#EEEEEE"
+        CanResize="False"
+        FontFamily="Inter">
+    <Window.Styles>
+        <Style Selector="TextBlock">
+            <Setter Property="Foreground" Value="#EEEEEE"/>
+        </Style>
+        <Style Selector="Button">
+            <Setter Property="Foreground" Value="#EEEEEE"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="Padding" Value="0"/>
+        </Style>
+        <Style Selector="Button:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#29b765"/>
+        </Style>
+    </Window.Styles>
+
+    <StackPanel Margin="30">
+        <Image Source="avares://Nag/app_logo.png"
+               Width="120" Height="120"
+               HorizontalAlignment="Center"
+               Margin="0,0,0,20"/>
+
+        <TextBlock Text="Welcome to Nag!"
+                   FontSize="22" FontWeight="Bold"
+                   HorizontalAlignment="Center"
+                   Margin="0,0,0,10"/>
+
+        <TextBlock Text="Nag delivers periodic notification reminders throughout your day. You can start with the built-in example category, or import your own custom pack right now."
+                   TextWrapping="Wrap"
+                   Foreground="#BBBBBB"
+                   FontSize="13"
+                   LineHeight="20"
+                   HorizontalAlignment="Center"
+                   TextAlignment="Center"
+                   Margin="0,0,0,25"/>
+
+        <Button x:Name="ImportButton"
+                Content="Import a Custom Pack..."
+                Background="#2ECC71" Foreground="White"
+                BorderThickness="0"
+                Height="40" FontWeight="SemiBold" FontSize="14"
+                Cursor="Hand"
+                HorizontalAlignment="Stretch"
+                Click="ImportButton_Click"
+                Margin="0,0,0,12"/>
+
+        <Button x:Name="SkipButton"
+                Content="Skip — use example messages"
+                Background="#16213E" Foreground="#888888"
+                BorderThickness="1" BorderBrush="#888888"
+                Height="35" FontSize="13"
+                Cursor="Hand"
+                HorizontalAlignment="Stretch"
+                Click="SkipButton_Click"/>
+    </StackPanel>
+</Window>
