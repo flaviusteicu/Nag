@@ -74,20 +74,30 @@ namespace Nag
             if (_desktop == null) return;
 
             var settingsService = ServiceProvider.GetRequiredService<ISettingsService>();
+            var messageService = ServiceProvider.GetRequiredService<IMessageService>();
+            var categoryService = ServiceProvider.GetRequiredService<ICategoryService>();
 
             if (!didImport)
             {
                 // Either not first run (idempotent) or user skipped import
-                settingsService.EnsureCategoriesScaffold();
+                categoryService.EnsureCategoriesScaffold();
             }
 
-            settingsService.SyncCategories();
+            categoryService.SyncCategories();
 
             var scheduler = ServiceProvider.GetRequiredService<INotificationScheduler>();
             var positioningService = ServiceProvider.GetRequiredService<IPositioningService>();
 
+            // Surface corrupted configuration files to the user
+            if (settingsService.LoadCorrupted || messageService.LoadCorrupted)
+            {
+                var warningMsg = "A configuration file was corrupted and has been reset to defaults. Check nag.log for details.";
+                var popup = new NotificationPopup("system", "Warning", warningMsg, 10, positioningService);
+                popup.Show();
+            }
+
             _trayIconManager = new TrayIconManager();
-            InitializeTrayIcon(_desktop, settingsService, scheduler, positioningService);
+            _trayIconManager.Initialize(this, settingsService, messageService, categoryService, scheduler, positioningService, () => ShowSettingsWindow(scheduler), () => _desktop.Shutdown());
 
             scheduler.Start();
         }
@@ -95,24 +105,16 @@ namespace Nag
         private void ConfigureServices(IServiceCollection services)
         {
             services.AddSingleton<ISettingsService, SettingsService>();
+            services.AddSingleton<IMessageService, MessageService>();
+            services.AddSingleton<ICategoryService, CategoryService>();
             services.AddSingleton<INotificationScheduler, NotificationScheduler>();
             services.AddSingleton<IPositioningService, Nag.Helpers.PositioningService>();
-            
+
             services.AddTransient<SettingsViewModel>();
             services.AddTransient<WeightSettingsViewModel>();
-            
+
             services.AddTransient<SettingsWindow>();
             services.AddTransient<WeightSettingsWindow>();
-        }
-
-        private void InitializeTrayIcon(IClassicDesktopStyleApplicationLifetime desktop, ISettingsService settingsService, INotificationScheduler scheduler, IPositioningService positioningService)
-        {
-            if (_trayIconManager == null) return;
-            
-            bool isPaused = settingsService.Settings.IsPaused;
-            bool isStartup = StartupService.IsStartupEnabled();
-
-            _trayIconManager.Initialize(this, settingsService, scheduler, positioningService, () => ShowSettingsWindow(scheduler), () => desktop.Shutdown());
         }
 
         private void ShowSettingsWindow(INotificationScheduler scheduler)

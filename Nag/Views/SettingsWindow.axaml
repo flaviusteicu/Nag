@@ -51,7 +51,7 @@
     
     <Panel>
         <!-- Main scrollable content -->
-        <Grid Margin="20" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto">
+        <Grid Margin="20" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto">
             
             <!-- Frequency -->
             <StackPanel Grid.Row="0" Margin="0,0,0,15">
@@ -106,9 +106,14 @@
                     Background="#2ECC71" Foreground="White" BorderThickness="0" 
                     Height="35" FontWeight="SemiBold" Cursor="Hand" Command="{Binding SaveCommand}" HorizontalAlignment="Stretch"/>
 
-            <Button Grid.Row="6" Content="Preview Notification" 
-                    Background="#16213E" Foreground="#888888" BorderThickness="1" BorderBrush="#888888" 
+            <Button Grid.Row="6" Content="Preview Notification"
+                    Background="#16213E" Foreground="#888888" BorderThickness="1" BorderBrush="#888888"
                     Height="30" Cursor="Hand" Command="{Binding PreviewCommand}" Margin="0,15,0,0" HorizontalAlignment="Stretch"/>
+
+            <!-- Version -->
+            <TextBlock Grid.Row="7" Text="{Binding VersionText}"
+                       Foreground="#555555" FontSize="11"
+                       HorizontalAlignment="Center" Margin="0,15,0,5"/>
         </Grid>
         
         <!-- Floating icons top-right, overlaid on top of the form -->

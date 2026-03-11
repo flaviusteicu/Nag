@@ -148,6 +148,21 @@ namespace Nag.ViewModels
         /// <summary> Returns true only on Windows, where auto-start via Registry is supported. </summary>
         public bool IsStartupSupported => System.OperatingSystem.IsWindows();
 
+        /// <summary> Reads the app version from the VERSION file, or returns "dev" if unavailable. </summary>
+        public string VersionText
+        {
+            get
+            {
+                var path = Path.Combine(AppContext.BaseDirectory, "VERSION");
+                if (File.Exists(path))
+                {
+                    var ver = File.ReadAllText(path).Trim();
+                    if (!string.IsNullOrEmpty(ver)) return $"v{ver}";
+                }
+                return "dev";
+            }
+        }
+
         /// <summary> Command to commit state changes to disk and rebuild the notification schedule dynamically. </summary>
         public ICommand SaveCommand { get; }
         

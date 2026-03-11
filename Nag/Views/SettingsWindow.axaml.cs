@@ -59,8 +59,8 @@ namespace Nag.Views
                         string path = folder.TryGetLocalPath() ?? string.Empty;
                         if (!string.IsNullOrEmpty(path))
                         {
-                            var settingsSvc = ((App)Application.Current!).ServiceProvider.GetRequiredService<ISettingsService>();
-                            var summary = settingsSvc.ImportCustomPack(path);
+                            var categorySvc = ((App)Application.Current!).ServiceProvider.GetRequiredService<ICategoryService>();
+                            var summary = categorySvc.ImportCustomPack(path);
                             
                             // Show result dialog
                             var msgBox = new Window

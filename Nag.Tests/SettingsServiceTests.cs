@@ -30,24 +30,31 @@ namespace Nag.Tests
         }
 
         [Fact]
-        public void Constructor_CreatesDefaultFiles_WhenTheyDoNotExist()
+        public void Constructor_CreatesDefaultSettingsFile_WhenItDoesNotExist()
         {
             var service = new SettingsService();
 
             Assert.True(File.Exists(_settingsPath), "settings.json should be created by the constructor.");
-            Assert.True(File.Exists(_messagesPath), "messages.json should be created by the constructor.");
             Assert.NotNull(service.Settings);
+        }
+
+        [Fact]
+        public void Constructor_CreatesDefaultMessagesFile_WhenItDoesNotExist()
+        {
+            var service = new MessageService();
+
+            Assert.True(File.Exists(_messagesPath), "messages.json should be created by the constructor.");
             Assert.NotNull(service.Messages);
         }
 
         [Fact]
         public void GetRandomMessage_ReturnsSystemFallback_WhenNoCategoriesEnabled()
         {
-            var service = new SettingsService();
+            var service = new MessageService();
             // Default configuration has zero categories
-            
+
             var msg = service.GetRandomMessage();
-            
+
             Assert.NotNull(msg);
             Assert.Equal("system", msg.Value.CategoryId);
             Assert.Equal("System", msg.Value.CategoryName);
@@ -57,29 +64,29 @@ namespace Nag.Tests
         [Fact]
         public void GetRandomMessage_RespectsCategoryWeights_Statistically()
         {
-            var service = new SettingsService();
-            
-            service.Messages.Categories.Add(new MessageCategory 
-            { 
-                Id = "light", 
-                Name = "Light Weight", 
-                Enabled = true, 
-                Weight = 10, 
-                Messages = new List<string> { "L1", "L2", "L3" } 
+            var service = new MessageService();
+
+            service.Messages.Categories.Add(new MessageCategory
+            {
+                Id = "light",
+                Name = "Light Weight",
+                Enabled = true,
+                Weight = 10,
+                Messages = new List<string> { "L1", "L2", "L3" }
             });
 
-            service.Messages.Categories.Add(new MessageCategory 
-            { 
-                Id = "heavy", 
-                Name = "Heavy Weight", 
-                Enabled = true, 
-                Weight = 90, 
-                Messages = new List<string> { "H1", "H2", "H3", "H4", "H5", "H6", "H7", "H8", "H9", "H10" } 
+            service.Messages.Categories.Add(new MessageCategory
+            {
+                Id = "heavy",
+                Name = "Heavy Weight",
+                Enabled = true,
+                Weight = 90,
+                Messages = new List<string> { "H1", "H2", "H3", "H4", "H5", "H6", "H7", "H8", "H9", "H10" }
             });
 
             int lightSelected = 0;
             int heavySelected = 0;
-            
+
             // Draw 1000 tickets
             for (int i = 0; i < 1000; i++)
             {
@@ -96,15 +103,15 @@ namespace Nag.Tests
         [Fact]
         public void GetRandomMessage_AvoidsConsecutiveDuplicates_WhenMultipleMessagesExist()
         {
-            var service = new SettingsService();
-            
-            service.Messages.Categories.Add(new MessageCategory 
-            { 
-                Id = "multi", 
-                Name = "Multi", 
-                Enabled = true, 
-                Weight = 1, 
-                Messages = new List<string> { "Message A", "Message B" } 
+            var service = new MessageService();
+
+            service.Messages.Categories.Add(new MessageCategory
+            {
+                Id = "multi",
+                Name = "Multi",
+                Enabled = true,
+                Weight = 1,
+                Messages = new List<string> { "Message A", "Message B" }
             });
 
             string? lastMessage = null;
@@ -122,6 +129,28 @@ namespace Nag.Tests
 
             // The anti-repetition constraint should mathematically prevent identical sequential messages
             Assert.Equal(0, consecutiveDuplicates);
+        }
+
+        [Fact]
+        public void LoadSettings_SetsLoadCorrupted_WhenJsonIsInvalid()
+        {
+            File.WriteAllText(_settingsPath, "NOT VALID JSON {{{");
+
+            var service = new SettingsService();
+
+            Assert.True(service.LoadCorrupted, "LoadCorrupted should be true when settings.json is corrupted.");
+            Assert.NotNull(service.Settings); // Should still have default settings
+        }
+
+        [Fact]
+        public void LoadMessages_SetsLoadCorrupted_WhenJsonIsInvalid()
+        {
+            File.WriteAllText(_messagesPath, "NOT VALID JSON {{{");
+
+            var service = new MessageService();
+
+            Assert.True(service.LoadCorrupted, "LoadCorrupted should be true when messages.json is corrupted.");
+            Assert.NotNull(service.Messages); // Should still have default messages
         }
     }
 }

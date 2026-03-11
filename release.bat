@@ -2,12 +2,12 @@
 setlocal
 
 :: Nag Release Builder - double-click to build all platforms
-:: Prompts for a version number, then builds everything.
+:: Reads version from the VERSION file in the repo root.
 
-set /p VERSION="Enter version (e.g. 1.0.3): "
+set /p VERSION=<"%~dp0VERSION"
 
 if "%VERSION%"=="" (
-    echo No version entered. Aborting.
+    echo VERSION file is missing or empty. Aborting.
     pause
     exit /b 1
 )

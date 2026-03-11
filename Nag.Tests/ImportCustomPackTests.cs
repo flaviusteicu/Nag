@@ -41,11 +41,18 @@ namespace Nag.Tests
             if (File.Exists(_messagesPath)) File.Delete(_messagesPath);
         }
 
+        private (MessageService messageService, CategoryService categoryService) CreateServices()
+        {
+            var messageService = new MessageService();
+            var categoryService = new CategoryService(messageService);
+            return (messageService, categoryService);
+        }
+
         [Fact]
         public void EnsureCategoriesScaffold_CreatesExampleFolder()
         {
-            var service = new SettingsService();
-            service.EnsureCategoriesScaffold();
+            var (_, categoryService) = CreateServices();
+            categoryService.EnsureCategoriesScaffold();
 
             var exampleDir = Path.Combine(_categoriesDir, "Example");
             Assert.True(Directory.Exists(exampleDir), "Example folder should be created.");
@@ -55,35 +62,35 @@ namespace Nag.Tests
         [Fact]
         public void EnsureCategoriesScaffold_DoesNotOverwrite_WhenAlreadyExists()
         {
-            var service = new SettingsService();
-            service.EnsureCategoriesScaffold();
+            var (_, categoryService) = CreateServices();
+            categoryService.EnsureCategoriesScaffold();
 
             // Modify the messages.txt
             var msgPath = Path.Combine(_categoriesDir, "Example", "messages.txt");
             File.WriteAllText(msgPath, "Custom content");
 
             // Call again — should not overwrite
-            service.EnsureCategoriesScaffold();
+            categoryService.EnsureCategoriesScaffold();
             Assert.Equal("Custom content", File.ReadAllText(msgPath));
         }
 
         [Fact]
         public void SyncCategories_CreatesNewCategory_FromValidFolder()
         {
-            var service = new SettingsService();
+            var (messageService, categoryService) = CreateServices();
 
             // Create a valid category folder
             var catDir = Path.Combine(_categoriesDir, "TestCategory");
             Directory.CreateDirectory(catDir);
             File.WriteAllText(Path.Combine(catDir, "messages.txt"), "Hello world\nSecond message");
 
-            var result = service.SyncCategories();
+            var result = categoryService.SyncCategories();
 
             Assert.Contains("Synced", result);
             Assert.Contains("2 messages", result);
 
             // Verify the category was added to messages
-            var category = service.Messages.Categories.FirstOrDefault(c => c.Name == "TestCategory");
+            var category = messageService.Messages.Categories.FirstOrDefault(c => c.Name == "TestCategory");
             Assert.NotNull(category);
             Assert.Equal(2, category.Messages.Count);
             Assert.Contains("Hello world", category.Messages);
@@ -94,30 +101,30 @@ namespace Nag.Tests
         [Fact]
         public void SyncCategories_SkipsFolder_WithNoTextFiles()
         {
-            var service = new SettingsService();
+            var (messageService, categoryService) = CreateServices();
 
             // Create a folder with only an image
             var catDir = Path.Combine(_categoriesDir, "ImageOnly");
             Directory.CreateDirectory(catDir);
             File.WriteAllBytes(Path.Combine(catDir, "avatar.png"), new byte[] { 0x89, 0x50, 0x4E, 0x47 }); // PNG header
 
-            var result = service.SyncCategories();
+            var result = categoryService.SyncCategories();
 
             Assert.Contains("Skipped", result);
             Assert.Contains("no text files", result);
-            Assert.DoesNotContain("ImageOnly", service.Messages.Categories.Select(c => c.Name));
+            Assert.DoesNotContain("ImageOnly", messageService.Messages.Categories.Select(c => c.Name));
         }
 
         [Fact]
         public void SyncCategories_SkipsFolder_WithEmptyTextFiles()
         {
-            var service = new SettingsService();
+            var (_, categoryService) = CreateServices();
 
             var catDir = Path.Combine(_categoriesDir, "EmptyTexts");
             Directory.CreateDirectory(catDir);
             File.WriteAllText(Path.Combine(catDir, "messages.txt"), "   \n\n   ");
 
-            var result = service.SyncCategories();
+            var result = categoryService.SyncCategories();
 
             Assert.Contains("Skipped", result);
             Assert.Contains("empty", result);
@@ -126,7 +133,7 @@ namespace Nag.Tests
         [Fact]
         public void SyncCategories_WarnsOnMultipleImages()
         {
-            var service = new SettingsService();
+            var (_, categoryService) = CreateServices();
 
             var catDir = Path.Combine(_categoriesDir, "MultiImage");
             Directory.CreateDirectory(catDir);
@@ -134,7 +141,7 @@ namespace Nag.Tests
             File.WriteAllBytes(Path.Combine(catDir, "img1.png"), new byte[] { 0x89 });
             File.WriteAllBytes(Path.Combine(catDir, "img2.jpg"), new byte[] { 0xFF });
 
-            var result = service.SyncCategories();
+            var result = categoryService.SyncCategories();
 
             Assert.Contains("multiple images", result);
         }
@@ -142,16 +149,16 @@ namespace Nag.Tests
         [Fact]
         public void SyncCategories_CopiesAvatarToImagesFolder()
         {
-            var service = new SettingsService();
+            var (messageService, categoryService) = CreateServices();
 
             var catDir = Path.Combine(_categoriesDir, "WithAvatar");
             Directory.CreateDirectory(catDir);
             File.WriteAllText(Path.Combine(catDir, "messages.txt"), "A message");
             File.WriteAllBytes(Path.Combine(catDir, "avatar.png"), new byte[] { 0x89, 0x50, 0x4E, 0x47 });
 
-            service.SyncCategories();
+            categoryService.SyncCategories();
 
-            var category = service.Messages.Categories.First(c => c.Name == "WithAvatar");
+            var category = messageService.Messages.Categories.First(c => c.Name == "WithAvatar");
             var expectedImg = Path.Combine(_imagesDir, $"{category.Id}.png");
             Assert.True(File.Exists(expectedImg), "Avatar should be copied to Images folder.");
         }
@@ -159,10 +166,10 @@ namespace Nag.Tests
         [Fact]
         public void SyncCategories_DoesNotTouchBuiltInCategories()
         {
-            var service = new SettingsService();
+            var (messageService, categoryService) = CreateServices();
 
             // Add a built-in category with a non-GUID id
-            service.Messages.Categories.Add(new MessageCategory
+            messageService.Messages.Categories.Add(new MessageCategory
             {
                 Id = "evidence",
                 Name = "Evidence Against the Narrative",
@@ -170,22 +177,22 @@ namespace Nag.Tests
                 Weight = 1,
                 Messages = new List<string> { "Original message" }
             });
-            service.SaveMessages();
+            messageService.SaveMessages();
 
             // Create a Categories folder with a similarly-named folder
             var catDir = Path.Combine(_categoriesDir, "Evidence Against the Narrative");
             Directory.CreateDirectory(catDir);
             File.WriteAllText(Path.Combine(catDir, "messages.txt"), "Imported message");
 
-            service.SyncCategories();
+            categoryService.SyncCategories();
 
             // The built-in should be untouched
-            var builtin = service.Messages.Categories.First(c => c.Id == "evidence");
+            var builtin = messageService.Messages.Categories.First(c => c.Id == "evidence");
             Assert.Single(builtin.Messages);
             Assert.Equal("Original message", builtin.Messages[0]);
 
             // A new imported one should exist alongside
-            var imported = service.Messages.Categories.FirstOrDefault(c => c.Name == "Evidence Against the Narrative" && Guid.TryParse(c.Id, out _));
+            var imported = messageService.Messages.Categories.FirstOrDefault(c => c.Name == "Evidence Against the Narrative" && Guid.TryParse(c.Id, out _));
             Assert.NotNull(imported);
             Assert.Single(imported.Messages);
             Assert.Equal("Imported message", imported.Messages[0]);
@@ -194,20 +201,20 @@ namespace Nag.Tests
         [Fact]
         public void ImportCustomPack_CopiesExternalFolderIntoCategories()
         {
-            var service = new SettingsService();
+            var (messageService, categoryService) = CreateServices();
 
             // Create an external folder with a category
             var extCatDir = Path.Combine(_tempExternalDir, "FriendCategory");
             Directory.CreateDirectory(extCatDir);
             File.WriteAllText(Path.Combine(extCatDir, "messages.txt"), "Friend message 1\nFriend message 2");
 
-            var result = service.ImportCustomPack(_tempExternalDir);
+            var result = categoryService.ImportCustomPack(_tempExternalDir);
 
             Assert.Contains("Synced", result);
             Assert.True(Directory.Exists(Path.Combine(_categoriesDir, "FriendCategory")),
                 "External folder should be copied into Categories/.");
-            
-            var category = service.Messages.Categories.FirstOrDefault(c => c.Name == "FriendCategory");
+
+            var category = messageService.Messages.Categories.FirstOrDefault(c => c.Name == "FriendCategory");
             Assert.NotNull(category);
             Assert.Equal(2, category.Messages.Count);
         }
@@ -215,23 +222,23 @@ namespace Nag.Tests
         [Fact]
         public void ImportCustomPack_ReturnsError_ForInvalidPath()
         {
-            var service = new SettingsService();
-            var result = service.ImportCustomPack("/nonexistent/path");
+            var (_, categoryService) = CreateServices();
+            var result = categoryService.ImportCustomPack("/nonexistent/path");
             Assert.Contains("invalid", result);
         }
 
         [Fact]
         public void SyncCategories_HandlesJsonMessageFiles()
         {
-            var service = new SettingsService();
+            var (messageService, categoryService) = CreateServices();
 
             var catDir = Path.Combine(_categoriesDir, "JsonCategory");
             Directory.CreateDirectory(catDir);
             File.WriteAllText(Path.Combine(catDir, "messages.json"), "[\"JSON message 1\", \"JSON message 2\"]");
 
-            service.SyncCategories();
+            categoryService.SyncCategories();
 
-            var category = service.Messages.Categories.First(c => c.Name == "JsonCategory");
+            var category = messageService.Messages.Categories.First(c => c.Name == "JsonCategory");
             Assert.Equal(2, category.Messages.Count);
             Assert.Contains("JSON message 1", category.Messages);
         }

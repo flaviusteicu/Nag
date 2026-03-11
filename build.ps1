@@ -43,15 +43,18 @@ function Publish-Runtime {
         Write-Host "  Cleaned runtime Categories/ from publish output." -ForegroundColor Yellow
     }
 
-    # Bundle docs and platform-appropriate tools
+    # Bundle docs, VERSION, and platform-appropriate tools
     $repoRoot = Split-Path $ProjectDir -Parent
     Copy-Item "$repoRoot\README.md" "$OutputDir\README.md" -Force
+    if (Test-Path "$repoRoot\VERSION") {
+        Copy-Item "$repoRoot\VERSION" "$OutputDir\VERSION" -Force
+    }
     if ($RuntimeId -like "win-*") {
         Copy-Item "$repoRoot\migrate_to_categories.ps1" "$OutputDir\migrate_to_categories.ps1" -Force
-        Write-Host "  Bundled README.md and migrate_to_categories.ps1." -ForegroundColor Yellow
+        Write-Host "  Bundled README.md, VERSION, and migrate_to_categories.ps1." -ForegroundColor Yellow
     } else {
         Copy-Item "$repoRoot\start.sh" "$OutputDir\start.sh" -Force
-        Write-Host "  Bundled README.md and start.sh." -ForegroundColor Yellow
+        Write-Host "  Bundled README.md, VERSION, and start.sh." -ForegroundColor Yellow
     }
 }
 
