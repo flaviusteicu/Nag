@@ -18,6 +18,11 @@ Thought of making this for myself when I wanted to change my negative way of thi
 Run `Nag-win-Setup.exe` to install. The app starts in your system tray.
 
 ### macOS / Linux
+Download the right zip for your system:
+- **macOS (Apple Silicon / M1-M4):** `Nag-x.x.x-osx-arm64.zip`
+- **macOS (Intel):** `Nag-x.x.x-osx-x64.zip`
+- **Linux:** `Nag-x.x.x-linux-x64.zip`
+
 Extract the zip, then launch using the included helper script:
 
 ```bash
@@ -25,9 +30,8 @@ chmod +x start.sh
 ./start.sh
 ```
 
-The `start.sh` script marks the `Nag` binary as executable and launches it for you.
-On macOS you may also need to allow the app in **System Preferences > Security & Privacy**
-the first time you run it.
+The `start.sh` script handles everything — on macOS it strips the Gatekeeper quarantine
+(so you won't get "cannot be opened" errors), marks the binary as executable, and launches it.
 
 The app creates its data files (`Categories/`, `Images/`, etc.) right next to the binary.
 

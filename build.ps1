@@ -3,7 +3,7 @@ param(
     [Parameter(Mandatory = $true)]
     [string]$Version,
 
-    [ValidateSet("win", "osx", "linux", "osx-zip", "linux-zip", "all")]
+    [ValidateSet("win", "osx", "linux", "osx-zip", "osx-arm64-zip", "linux-zip", "all")]
     [string]$Target = "all"
 )
 
@@ -121,6 +121,15 @@ switch ($Target) {
         Compress-Archive -Path "$outDir\*" -DestinationPath $zipPath -Force
         Write-Host "macOS zip ready: $zipPath" -ForegroundColor Green
     }
+    "osx-arm64-zip" {
+        $rid = "osx-arm64"
+        $outDir = "$PSScriptRoot\publish\$rid"
+        Publish-Runtime -RuntimeId $rid -OutputDir $outDir
+        $zipPath = "$ReleasesDir\Nag-$Version-osx-arm64.zip"
+        if (!(Test-Path $ReleasesDir)) { New-Item -ItemType Directory $ReleasesDir | Out-Null }
+        Compress-Archive -Path "$outDir\*" -DestinationPath $zipPath -Force
+        Write-Host "macOS ARM64 zip ready: $zipPath" -ForegroundColor Green
+    }
     "linux-zip" {
         $rid = "linux-x64"
         $outDir = "$PSScriptRoot\publish\$rid"
@@ -152,6 +161,13 @@ switch ($Target) {
             $zipPath = "$ReleasesDir\Nag-$Version-osx-x64.zip"
             Compress-Archive -Path "$outDir\*" -DestinationPath $zipPath -Force
             Write-Host "macOS zip ready: $zipPath" -ForegroundColor Green
+
+            $rid = "osx-arm64"
+            $outDir = "$PSScriptRoot\publish\$rid"
+            Publish-Runtime -RuntimeId $rid -OutputDir $outDir
+            $zipPath = "$ReleasesDir\Nag-$Version-osx-arm64.zip"
+            Compress-Archive -Path "$outDir\*" -DestinationPath $zipPath -Force
+            Write-Host "macOS ARM64 zip ready: $zipPath" -ForegroundColor Green
 
             $rid = "linux-x64"
             $outDir = "$PSScriptRoot\publish\$rid"

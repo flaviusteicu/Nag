@@ -145,6 +145,9 @@ namespace Nag.ViewModels
             set => SetProperty(ref _startWithWindows, value);
         }
 
+        /// <summary> Returns true only on Windows, where auto-start via Registry is supported. </summary>
+        public bool IsStartupSupported => System.OperatingSystem.IsWindows();
+
         /// <summary> Command to commit state changes to disk and rebuild the notification schedule dynamically. </summary>
         public ICommand SaveCommand { get; }
         
